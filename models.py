@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, String, create_engine
+from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
@@ -28,7 +28,7 @@ class ApparelItem(db.Model):
 
   id = Column(Integer, primary_key=True)
   target_demographic = Column(String)
-  colors = Column(ARRAY(String))
+  colors = Column(String)
   item_name = Column(String)
 
   def __init__(self, target_demographic, colors, item_name):
