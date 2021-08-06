@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, abort
 from flask_cors import CORS
 from models import setup_db, ApparelItem
-from .auth.auth import AuthError, requires_auth
+from auth.auth import AuthError, requires_auth
 
 def create_app(test_config=None):
 
