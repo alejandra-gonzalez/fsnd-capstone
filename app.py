@@ -1,7 +1,7 @@
 import os
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-from models import setup_db, ApparelItem
+from models import setup_db, ApparelItem, Order
 from auth.auth import AuthError, requires_auth
 
 def create_app(test_config=None):
@@ -31,6 +31,22 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'apparel_items': [item.short() for item in all_apparel_items]
+        }), 200
+
+    '''
+    GET /orders:
+        Requires the 'get:orders' permission. Contain the order.short() data
+        representation. Returns status code 200 and the list of Orders or the
+        appropriate status code indicating reason for failure.
+    '''
+    @app.route('/orders', methods=['GET'])
+    @requires_auth('get:orders')
+    def get_orders(jwt):
+        all_orders = [order.short() for order in Order.query.all()]
+
+        return jsonify({
+            'success': True,
+            'orders': all_orders
         }), 200
 
     @app.route('/coolkids')
