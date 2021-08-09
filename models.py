@@ -98,6 +98,10 @@ class Order(db.Model):
       'billing_state': self.billing_state,
       'order_date': self.order_date}
 
+  def insert(self):
+    db.session.add(self)
+    db.session.commit()
+
 '''
 OrderItems
 Have id, order id, item id and quantity
