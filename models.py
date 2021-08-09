@@ -24,15 +24,16 @@ def setup_db(app, database_path=database_path):
 ApparelItem
 Have target demographic, colors, name
 '''
-class ApparelItem(db.Model):  
-  __tablename__ = 'ApparelItems'
+class ApparelItem(db.Model):
+  __tablename__ = 'apparelItem'
 
   id = Column(Integer, primary_key=True)
-  target_demographic = Column(String)
-  color = Column(String)
-  item_name = Column(String)
-  price = Column(Integer)
-  released = Column(DateTime)
+  target_demographic = Column(String, nullable=False)
+  color = Column(String, nullable=False)
+  item_name = Column(String, nullable=False)
+  price = Column(Integer, nullable=False)
+  released = Column(DateTime, default=None)
+
   orders = db.relationship('OrderItem', 
     backref=db.backref('item', lazy="joined"))
 
@@ -52,22 +53,26 @@ class ApparelItem(db.Model):
       'price': self.price,
       'released': self.released}
 
+  def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
 '''
 Orders
 Have id, user id of the user placing the order, customer name, city and state
   to ship to, billing city and state
 '''
-class Order(db.Model):  
-  __tablename__ = 'Orders'
+class Order(db.Model):
+  __tablename__ = 'order'
 
   id = Column(Integer, primary_key=True)
   user_id = Column(String)
-  customer_name = Column(String)
-  ship_city = Column(String)
-  ship_state = Column(String)
-  billing_city = Column(String)
-  billing_state = Column(String)
-  order_date = Column(DateTime)
+  customer_name = Column(String, nullable=False)
+  ship_city = Column(String, nullable=False)
+  ship_state = Column(String, nullable=False)
+  billing_city = Column(String, nullable=False)
+  billing_state = Column(String, nullable=False)
+  order_date = Column(DateTime, nullable=False)
 
   items = db.relationship('OrderItem',
     backref=db.backref('order', lazy="joined"))
@@ -97,12 +102,12 @@ class Order(db.Model):
 OrderItems
 Have id, order id, item id and quantity
 '''
-class OrderItem(db.Model):  
-  __tablename__ = 'OrderItems'
+class OrderItem(db.Model):
+  __tablename__ = 'orderItem'
 
   id = Column(Integer, primary_key=True)
-  order_id = Column(Integer, db.ForeignKey('Orders.id'), nullable=False)
-  item_id = Column(Integer, db.ForeignKey('ApparelItems.id'), nullable=False)
+  order_id = Column(Integer, db.ForeignKey('order.id'), nullable=False)
+  item_id = Column(Integer, db.ForeignKey('apparelItem.id'), nullable=False)
   quantity = Column(Integer, nullable=False, default=1)
 
   def __init__(self, order_id, item_id, quantity):

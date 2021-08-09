@@ -19,13 +19,14 @@ def create_app(test_config=None):
 
     # ROUTES
     '''
-    GET /apparelitems:
-        Public endpoint. Contains only the item.short() data representation.
-        Returns status code 200 and the list of ApparelItems or appropriate
-        status code indicating reason for failure.
+    GET /apparel:
+        Requires the 'get:items' permission. Contains the item.short() data
+        representation. Returns status code 200 and the list of ApparelItems
+        or appropriate status code indicating reason for failure.
     '''
     @app.route('/apparel', methods=['GET'])
-    def get_apparel_items():
+    @requires_auth('get:items')
+    def get_apparel_items(jwt):
         all_apparel_items = ApparelItem.query.order_by(ApparelItem.item_name).all()
 
         return jsonify({
@@ -47,6 +48,34 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'orders': all_orders
+        }), 200
+
+    '''
+    POST /apparel:
+        Requires the 'post:items' permission. Creates a new row in the
+        ApparelItems table. Returns status code 200 and an array with the new
+        ApparelItem or the appropriate status code indicating reason for
+        failure.
+    '''
+    @app.route('/apparel', methods=['POST'])
+    @requires_auth('post:items')
+    def post_item(jwt):
+        req = request.get_json()
+        if 'item_name' and 'target_demographic' and 'price' and 'color' and 'released' not in req:
+            abort(422)
+        
+        item_name = req['item_name']
+        target_demographic = req['target_demographic']
+        price = req['price']
+        color = req['color']
+        released = req['released']
+        item = ApparelItem(item_name=item_name, 
+            target_demographic=target_demographic, price=price, color=color, released=released)
+        item.insert()
+
+        return jsonify({
+            'success': True,
+            'ApparelItems': [item.format()]
         }), 200
 
     @app.route('/coolkids')
