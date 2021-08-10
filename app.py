@@ -110,6 +110,39 @@ def create_app(test_config=None):
             'Order': [order.format()]
         }), 200
 
+    '''
+    PATCH /apparel/<id>
+        where <id> is the existing ApparelItem id:
+        Responds with a 404 error if <id> is not found. Updates the 
+        corresponding row for <id>. Requires the 'patch:items' permission. 
+        Returns status code 200 and an array with the updated ApparelItem or
+        the appropriate status code indicating reason for failure.
+    '''
+    @app.route('/apparel/<int:id>', methods=['PATCH'])
+    @requires_auth('patch:items')
+    def update_item(jwt, id):
+        item = ApparelItem.query.get(id)
+        if item is None:
+            abort(404)
+        
+        req = request.get_json()
+        if 'item_name' in req:
+            item.item_name = req['item_name']
+        if 'target_demographic' in req:
+            item.target_demographic = req['target_demographic']
+        if 'price' in req:
+            item.price = req['price']
+        if 'color' in req:
+            item.color = req['color']
+        if 'released' in req:
+            item.released = req['released']
+        item.update()
+        
+        return jsonify({
+            'success': True,
+            'item': [item.format()]
+        }), 200
+
     @app.route('/coolkids')
     def be_cool():
         return "Be cool, man, be coooool! You're almost a FSND grad!"

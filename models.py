@@ -54,8 +54,11 @@ class ApparelItem(db.Model):
       'released': self.released}
 
   def insert(self):
-        db.session.add(self)
-        db.session.commit()
+    db.session.add(self)
+    db.session.commit()
+
+  def update(self):
+    db.session.commit()
 
 '''
 Orders
@@ -102,6 +105,9 @@ class Order(db.Model):
     db.session.add(self)
     db.session.commit()
 
+  def update(self):
+    db.session.commit()
+
 '''
 OrderItems
 Have id, order id, item id and quantity
@@ -125,3 +131,6 @@ class OrderItem(db.Model):
       'order_id': self.order_id,
       'item_id': self.item_id,
       'quantity': self.quantity}
+
+  def update(self):
+    db.session.commit()
