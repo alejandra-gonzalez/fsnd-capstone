@@ -60,6 +60,10 @@ class ApparelItem(db.Model):
   def update(self):
     db.session.commit()
 
+  def delete(self):
+    db.session.delete(self)
+    db.session.commit()
+
 '''
 Orders
 Have id, user id of the user placing the order, customer name, city and state

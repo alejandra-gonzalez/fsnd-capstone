@@ -11,11 +11,8 @@ def create_app(test_config=None):
     CORS(app)
 
     @app.route('/')
-    def get_greeting():
-        excited = os.environ['EXCITED']
-        greeting = "Hello" 
-        if excited == 'true': greeting = greeting + "!!!!!"
-        return greeting
+    def be_cool():
+        return "Be cool, man, be coooool! You're almost a FSND grad!"
 
     # ROUTES
     '''
@@ -90,7 +87,8 @@ def create_app(test_config=None):
     @requires_auth('post:orders')
     def post_order(jwt):
         req = request.get_json()
-        if ('customer_name' and 'ship_city' and 'ship_state' and 'billing_city' and 'billing_state' and 'order_date' not in req):
+        if ('customer_name' and 'ship_city' and 'ship_state' and 'billing_city'
+         and 'billing_state' and 'order_date' not in req):
             abort(422)
         
         customer_name = req['customer_name']
@@ -143,9 +141,26 @@ def create_app(test_config=None):
             'item': [item.format()]
         }), 200
 
-    @app.route('/coolkids')
-    def be_cool():
-        return "Be cool, man, be coooool! You're almost a FSND grad!"
+    '''
+    DELETE /apparel/<id>
+            Where <id> is the existing ApparelItem id:
+            Responds with a 404 error if <id> is not found. Deletes the 
+            corresponding row for <id>. Requires the 'delete:items' permission.
+            Returns status code 200 and the id of the deleted ApparelItem or
+            the appropriate status code indicating reason for failure.
+    '''
+    @app.route('/apparel/<int:id>', methods=['DELETE'])
+    @requires_auth('delete:items')
+    def delete_item(jwt, id):
+        item = ApparelItem.query.get(id)
+        if item is None:
+            abort(404)
+        item.delete()
+
+        return jsonify({
+            'success': True,
+            'deleted': item.id
+        }), 200
 
     return app
 
