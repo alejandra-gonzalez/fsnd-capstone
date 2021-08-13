@@ -58,8 +58,8 @@ def create_app(test_config=None):
     @requires_auth('post:items')
     def post_item(jwt):
         req = request.get_json()
-        if (('item_name' or 'target_demographic' or 'price' or 'color' or 
-        'released') not in req):
+        if ('item_name' not in req or 'target_demographic' not in req or
+        'price' not in req or 'color' not in req or 'released' not in req):
             abort(422)
         
         item_name = req['item_name']
@@ -87,8 +87,9 @@ def create_app(test_config=None):
     @requires_auth('post:orders')
     def post_order(jwt):
         req = request.get_json()
-        if (('customer_name' or 'ship_city' or 'ship_state' or 'billing_city'
-         or 'billing_state' or 'order_date') not in req):
+        if ('customer_name' not in req or 'ship_city' not in req or 
+        'ship_state' not in req or 'billing_city' not in req or 'billing_state'
+        not in req or 'order_date' not in req):
             abort(422)
         
         customer_name = req['customer_name']

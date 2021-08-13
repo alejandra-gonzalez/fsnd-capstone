@@ -29,6 +29,22 @@ class SkylightTestCase(unittest.TestCase):
             "released": "2021-03-15 12:05:57.10558"
         }
 
+        self.VALID_NEW_ORDER = {
+            "customer_name": "Vitaly Abdullah",
+            "ship_city": "Garland",
+            "ship_state": "TX",
+            "billing_city": "Garland",
+            "billing_state": "TX",
+            "order_date": "2021-04-17 12:05:57.10558"
+        }
+
+        self.INVALID_NEW_ORDER = {
+            "customer_name": "Vitaly Abdullah",
+            "ship_city": "Garland",
+            "ship_state": "TX",
+            "order_date": "2021-04-17 12:05:57.10558"
+        }
+
         with self.app.app_context():
             self.db = SQLAlchemy()
             self.db.init_app(self.app)
@@ -94,8 +110,28 @@ class SkylightTestCase(unittest.TestCase):
 
     def test_create_item_fail(self):
         res = self.client().post('/apparel', headers={
-            'Authorization': "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkctTDdnYzIxbTJfWExpTUpCbEk0SSJ9.eyJpc3MiOiJodHRwczovL2FsZXgtZnNuZC51cy5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjA5NDAxMThlMzg2ZDIwMDY5NGU3NTc3IiwiYXVkIjoic2t5bGlnaHQiLCJpYXQiOjE2Mjg4MTYwNTEsImV4cCI6MTYyODgyMzI1MSwiYXpwIjoiajdITWlGZEh5U0FtZUpFUUdOcXFoZ2IzSXFudmNBVVAiLCJzY29wZSI6IiIsInBlcm1pc3Npb25zIjpbImRlbGV0ZTppdGVtcyIsImdldDppdGVtcyIsImdldDpvcmRlcnMiLCJwYXRjaDppdGVtcyIsInBvc3Q6aXRlbXMiXX0.IHPC9qsslcCG01zJ-AaGaAb9yry3IsTV9ayDhbgdAiNEZgWczTAH0caaDg-hS3kOB82ESXxkgcSB3H5t6OpAElJitdTPMoXpoe_MVY9UTEx91i7EVkiLShvd9FHVVCygEUxJ5k6WYvbz3VrKpchGQjDVeHvlfOEEc33_PYHVcYB8G61HWEKnhvTPT1E9CH_2IaVBZnrhVQx9DcHJYJZaBeFPypRljXCJm1I1-3frqWyWA6aJp1wzHAH77WLtBhB_QmfMhNhcUNWtgoErl5xbKoZdeP4wfagBYDoBoF0XahTErEi2-eVBswR3n3MCV9IK1msoIo_IdpPbQc6xGPtZ9w"
+            'Authorization': "Bearer {}".format(self.staff_token)
         }, json=self.INVALID_NEW_ITEM)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertTrue(data['error'])
+        self.assertEqual(data['success'], False)
+
+    def test_create_order_success(self):
+        res = self.client().post('/orders', headers={
+            'Authorization': "Bearer {}".format(self.customer_token)
+        }, json=self.VALID_NEW_ORDER)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data["success"])
+        self.assertIn('Order', data)
+
+    def test_create_order_fail(self):
+        res = self.client().post('/orders', headers={
+            'Authorization': "Bearer {}".format(self.customer_token)
+        }, json=self.INVALID_NEW_ORDER)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 422)
