@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-from models import setup_db, ApparelItem, Order
+from models import setup_db, ApparelItem, Order, OrderItem
 from auth.auth import AuthError, requires_auth
 
 def create_app(test_config=None):
@@ -28,7 +28,7 @@ def create_app(test_config=None):
 
         return jsonify({
             'success': True,
-            'apparel_items': [item.short() for item in all_apparel_items]
+            'apparel_items': [item.format() for item in all_apparel_items]
         }), 200
 
     '''
@@ -40,7 +40,7 @@ def create_app(test_config=None):
     @app.route('/orders', methods=['GET'])
     @requires_auth('get:orders')
     def get_orders(jwt):
-        all_orders = [order.short() for order in Order.query.all()]
+        all_orders = [order.format() for order in Order.query.all()]
 
         return jsonify({
             'success': True,
@@ -58,8 +58,8 @@ def create_app(test_config=None):
     @requires_auth('post:items')
     def post_item(jwt):
         req = request.get_json()
-        if ('item_name' and 'target_demographic' and 'price' and 'color' and 
-        'released' not in req):
+        if (('item_name' or 'target_demographic' or 'price' or 'color' or 
+        'released') not in req):
             abort(422)
         
         item_name = req['item_name']
@@ -87,8 +87,8 @@ def create_app(test_config=None):
     @requires_auth('post:orders')
     def post_order(jwt):
         req = request.get_json()
-        if ('customer_name' and 'ship_city' and 'ship_state' and 'billing_city'
-         and 'billing_state' and 'order_date' not in req):
+        if (('customer_name' or 'ship_city' or 'ship_state' or 'billing_city'
+         or 'billing_state' or 'order_date') not in req):
             abort(422)
         
         customer_name = req['customer_name']
@@ -161,6 +161,22 @@ def create_app(test_config=None):
             'success': True,
             'deleted': item.id
         }), 200
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+            "success": False,
+            "error": 422,
+            "message": "unprocessable"
+        }), 422
+
+    @app.errorhandler(AuthError)
+    def auth_error(error):
+        return jsonify({
+            "success": False,
+            "error": error.status_code,
+            "message": error.error['description']
+        }), error.status_code
 
     return app
 
