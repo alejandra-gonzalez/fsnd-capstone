@@ -125,6 +125,8 @@ def create_app(test_config=None):
             abort(404)
         
         req = request.get_json()
+        if not bool(req):
+            abort(422)
         if 'item_name' in req:
             item.item_name = req['item_name']
         if 'target_demographic' in req:

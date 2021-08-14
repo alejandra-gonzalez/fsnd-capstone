@@ -45,6 +45,12 @@ class SkylightTestCase(unittest.TestCase):
             "order_date": "2021-04-17 12:05:57.10558"
         }
 
+        self.VALID_ITEM_UPDATE = {
+            "color": "black"
+        }
+
+        self.INVALID_ITEM_UPDATE = {}
+
         with self.app.app_context():
             self.db = SQLAlchemy()
             self.db.init_app(self.app)
@@ -132,6 +138,28 @@ class SkylightTestCase(unittest.TestCase):
         res = self.client().post('/orders', headers={
             'Authorization': "Bearer {}".format(self.customer_token)
         }, json=self.INVALID_NEW_ORDER)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertTrue(data['error'])
+        self.assertEqual(data['success'], False)
+
+    def test_update_apparel_success(self):
+        res = self.client().patch('/apparel/1', headers={
+            'Authorization': "Bearer {}".format(self.staff_token)
+        }, json=self.VALID_ITEM_UPDATE)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data["success"])
+        self.assertIn('item', data)
+        self.assertEqual(data['item'][0]['color'],
+                         self.VALID_ITEM_UPDATE['color'])
+
+    def test_update_apparel_fail(self):
+        res = self.client().patch('/apparel/1', headers={
+            'Authorization': "Bearer {}".format(self.staff_token)
+        }, json=self.INVALID_ITEM_UPDATE)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 422)
