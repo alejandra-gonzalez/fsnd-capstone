@@ -46,7 +46,7 @@ class SkylightTestCase(unittest.TestCase):
         }
 
         self.VALID_ITEM_UPDATE = {
-            "color": "black"
+            "color": "pink"
         }
 
         self.INVALID_ITEM_UPDATE = {}
@@ -145,7 +145,7 @@ class SkylightTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
 
     def test_update_apparel_success(self):
-        res = self.client().patch('/apparel/1', headers={
+        res = self.client().patch('/apparel/2', headers={
             'Authorization': "Bearer {}".format(self.staff_token)
         }, json=self.VALID_ITEM_UPDATE)
         data = json.loads(res.data)
@@ -157,7 +157,7 @@ class SkylightTestCase(unittest.TestCase):
                          self.VALID_ITEM_UPDATE['color'])
 
     def test_update_apparel_fail(self):
-        res = self.client().patch('/apparel/1', headers={
+        res = self.client().patch('/apparel/3', headers={
             'Authorization': "Bearer {}".format(self.staff_token)
         }, json=self.INVALID_ITEM_UPDATE)
         data = json.loads(res.data)
@@ -165,6 +165,25 @@ class SkylightTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 422)
         self.assertTrue(data['error'])
         self.assertEqual(data['success'], False)
+
+    def test_delete_item_success(self):
+        res = self.client().delete('/apparel/1', headers={
+            'Authorization': "Bearer {}".format(self.staff_token)
+        })
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data["success"])
+
+    def test_delete_item_fail(self):
+        res = self.client().delete('/apparel/1000', headers={
+            'Authorization': "Bearer {}".format(self.staff_token)
+        })
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertTrue(data['error'])
+        self.assertFalse(data['success'])
 
 if __name__ == "__main__":
     unittest.main()
