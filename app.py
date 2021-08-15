@@ -4,6 +4,7 @@ from flask_cors import CORS
 from models import setup_db, ApparelItem, Order, OrderItem
 from auth.auth import AuthError, requires_auth
 
+
 def create_app(test_config=None):
 
     app = Flask(__name__)
@@ -24,7 +25,8 @@ def create_app(test_config=None):
     @app.route('/apparel', methods=['GET'])
     @requires_auth('get:items')
     def get_apparel_items(jwt):
-        all_apparel_items = ApparelItem.query.order_by(ApparelItem.item_name).all()
+        all_apparel_items = ApparelItem.query.order_by(ApparelItem.item_name)\
+            .all()
 
         return jsonify({
             'success': True,
@@ -59,17 +61,19 @@ def create_app(test_config=None):
     def post_item(jwt):
         req = request.get_json()
         if ('item_name' not in req or 'target_demographic' not in req or
-        'price' not in req or 'color' not in req or 'released' not in req):
+                'price' not in req or 'color' not in req or 'released' not in
+                req):
             abort(422)
-        
+
         item_name = req['item_name']
         target_demographic = req['target_demographic']
         price = req['price']
         color = req['color']
         released = req['released']
-        item = ApparelItem(item_name=item_name, 
-            target_demographic=target_demographic, price=price, color=color, 
-            released=released)
+        item = ApparelItem(item_name=item_name,
+                           target_demographic=target_demographic,
+                           price=price, color=color,
+                           released=released)
         item.insert()
 
         return jsonify({
@@ -87,20 +91,21 @@ def create_app(test_config=None):
     @requires_auth('post:orders')
     def post_order(jwt):
         req = request.get_json()
-        if ('customer_name' not in req or 'ship_city' not in req or 
-        'ship_state' not in req or 'billing_city' not in req or 'billing_state'
-        not in req or 'order_date' not in req):
+        if ('customer_name' not in req or 'ship_city' not in req or
+                'ship_state' not in req or 'billing_city' not in req or
+                'billing_state' not in req or 'order_date' not in req):
             abort(422)
-        
+
         customer_name = req['customer_name']
         ship_city = req['ship_city']
         ship_state = req['ship_state']
         billing_city = req['billing_city']
         billing_state = req['billing_state']
         order_date = req['order_date']
-        order = Order(customer_name=customer_name, ship_city=ship_city, 
-        ship_state=ship_state, billing_city=billing_city, 
-        billing_state=billing_state, order_date=order_date, user_id=None)
+        order = Order(customer_name=customer_name, ship_city=ship_city,
+                      ship_state=ship_state, billing_city=billing_city,
+                      billing_state=billing_state, order_date=order_date,
+                      user_id=None)
 
         order.insert()
 
@@ -112,8 +117,8 @@ def create_app(test_config=None):
     '''
     PATCH /apparel/<id>
         where <id> is the existing ApparelItem id:
-        Responds with a 404 error if <id> is not found. Updates the 
-        corresponding row for <id>. Requires the 'patch:items' permission. 
+        Responds with a 404 error if <id> is not found. Updates the
+        corresponding row for <id>. Requires the 'patch:items' permission.
         Returns status code 200 and an array with the updated ApparelItem or
         the appropriate status code indicating reason for failure.
     '''
@@ -123,7 +128,7 @@ def create_app(test_config=None):
         item = ApparelItem.query.get(id)
         if item is None:
             abort(404)
-        
+
         req = request.get_json()
         if not bool(req):
             abort(422)
@@ -138,7 +143,7 @@ def create_app(test_config=None):
         if 'released' in req:
             item.released = req['released']
         item.update()
-        
+
         return jsonify({
             'success': True,
             'item': [item.format()]
@@ -147,7 +152,7 @@ def create_app(test_config=None):
     '''
     DELETE /apparel/<id>
             Where <id> is the existing ApparelItem id:
-            Responds with a 404 error if <id> is not found. Deletes the 
+            Responds with a 404 error if <id> is not found. Deletes the
             corresponding row for <id>. Requires the 'delete:items' permission.
             Returns status code 200 and the id of the deleted ApparelItem or
             the appropriate status code indicating reason for failure.
@@ -190,6 +195,7 @@ def create_app(test_config=None):
         }), error.status_code
 
     return app
+
 
 app = create_app()
 
