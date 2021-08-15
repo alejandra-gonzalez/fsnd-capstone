@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from app import create_app
 from models import setup_db, ApparelItem, Order, OrderItem
 
+
 class SkylightTestCase(unittest.TestCase):
     def setUp(self):
         self.staff_token = os.environ['staff_token']
@@ -35,7 +36,7 @@ class SkylightTestCase(unittest.TestCase):
             "ship_state": "TX",
             "billing_city": "Garland",
             "billing_state": "TX",
-            "order_date": "2021-04-17 12:05:57.10558"
+            "order_date": "2021-05-17 12:05:57.10558"
         }
 
         self.INVALID_NEW_ORDER = {
@@ -145,7 +146,7 @@ class SkylightTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
 
     def test_update_apparel_success(self):
-        res = self.client().patch('/apparel/2', headers={
+        res = self.client().patch('/apparel/1', headers={
             'Authorization': "Bearer {}".format(self.staff_token)
         }, json=self.VALID_ITEM_UPDATE)
         data = json.loads(res.data)
@@ -157,7 +158,7 @@ class SkylightTestCase(unittest.TestCase):
                          self.VALID_ITEM_UPDATE['color'])
 
     def test_update_apparel_fail(self):
-        res = self.client().patch('/apparel/3', headers={
+        res = self.client().patch('/apparel/1', headers={
             'Authorization': "Bearer {}".format(self.staff_token)
         }, json=self.INVALID_ITEM_UPDATE)
         data = json.loads(res.data)
@@ -184,6 +185,7 @@ class SkylightTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertTrue(data['error'])
         self.assertFalse(data['success'])
+
 
 if __name__ == "__main__":
     unittest.main()

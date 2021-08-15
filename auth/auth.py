@@ -1,21 +1,25 @@
+import os
 import json
 from flask import request, abort
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
 
-AUTH0_DOMAIN = 'alex-fsnd.us.auth0.com'
-ALGORITHMS = ['RS256']
-API_AUDIENCE = 'skylight'
+AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
+ALGORITHMS = os.environ['ALGORITHMS']
+API_AUDIENCE = os.environ['API_AUDIENCE']
 
 '''
 AuthError Exception:
     Standardized way to communicate Auth failure modes
 '''
+
+
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
         self.status_code = status_code
+
 
 '''
 get_token_auth_header() method:
@@ -23,6 +27,8 @@ get_token_auth_header() method:
     and the token part. Raises AuthError if no header is present OR header is
     malformed. Returns the token part of the header.
 '''
+
+
 def get_token_auth_header():
     auth = request.headers.get('Authorization', None)
     if not auth:
@@ -43,15 +49,18 @@ def get_token_auth_header():
         }, 401)
     return parts[1]
 
+
 '''
 check_permissions(permission, payload) method:
     INPUTS:
         permission: string permission (i.e. 'post:drink')
         payload: decoded jwt payload
     Raises an AuthError if permissions are not included in the payload OR if
-    the requested permission string is not in the payload permissions array. 
+    the requested permission string is not in the payload permissions array.
     Returns true otherwise.
 '''
+
+
 def check_permissions(permission, payload):
     if 'permissions' not in payload:
         raise AuthError({
@@ -65,14 +74,17 @@ def check_permissions(permission, payload):
         }, 401)
     return True
 
+
 '''
 verify_decode_jwt(token) method:
     INPUTS:
         token: a json web token (string)
-    Verifies the Auth0 token that has key id (kid) using Auth0 
+    Verifies the Auth0 token that has key id (kid) using Auth0
     /.well-known/jwks.json, then decodes the payload from the token and checks
     the claims. Returns the decoded payload.
 '''
+
+
 def verify_decode_jwt(token):
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
@@ -110,7 +122,8 @@ def verify_decode_jwt(token):
         except jwt.JWTClaimsError:
             raise AuthError({
                 'code': 'invalid_claims',
-                'description': 'Incorrect claims. Please, check the audience and issuer.'
+                'description': 'Incorrect claims. Please, check the audience\
+                 and issuer.'
             }, 401)
         except Exception:
             raise AuthError({
@@ -122,6 +135,7 @@ def verify_decode_jwt(token):
         'description': 'Unable to find the appropriate key.'
     }, 400)
 
+
 '''
 @requires_auth(permission) decorator method:
     INPUTS:
@@ -131,6 +145,8 @@ def verify_decode_jwt(token):
     and the requested permission. Returns the decorator which passes the
     decoded payload to the decorated method.
 '''
+
+
 def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
